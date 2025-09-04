@@ -256,7 +256,21 @@ def forecast_costs(trend_df, forecast_days):
 # Function to get recommendations from AWS Bedrock
 def get_recommendations(cost_df, audit_df):
     try:
-        bedrock_runtime = boto3.client('bedrock-runtime', region_name=REGION)
+        # Retrieve credentials from Streamlit Secrets for Bedrock client
+        infra_access_key_id = st.secrets["infra-aws"]["access_key_id"]
+        infra_secret_access_key = st.secrets["infra-aws"]["secret_access_key"]
+
+        # Validate credentials
+        if not infra_access_key_id or not infra_secret_access_key:
+            raise Exception("Missing infra-aws access key or secret key in Streamlit Secrets")
+
+        # Initialize Bedrock client with infra-aws credentials
+        bedrock_runtime = boto3.client(
+            'bedrock-runtime',
+            region_name=REGION,
+            aws_access_key_id=infra_access_key_id,
+            aws_secret_access_key=infra_secret_access_key
+        )
     except Exception as e:
         logger.error(f"Failed to initialize Bedrock client: {str(e)}")
         st.error(f"Failed to initialize Bedrock client: {str(e)}")
