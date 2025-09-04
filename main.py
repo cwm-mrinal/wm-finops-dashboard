@@ -15,6 +15,7 @@ import logging
 import time
 import base64
 from PIL import Image
+from aws_accounts import sts
 
 # Constants for Bedrock
 REGION = 'ap-south-1'
@@ -30,37 +31,16 @@ logger = logging.getLogger()
 # ---------- Role Assumption ----------
 def assume_role(account_id: str):
     try:
-        # Retrieve credentials from Streamlit Secrets
-        access_key_id = st.secrets["aws"]["access_key_id"]
-        secret_access_key = st.secrets["aws"]["secret_access_key"]
-
-        # Validate credentials
-        if not access_key_id or not secret_access_key:
-            raise Exception("Missing access key or secret key in Streamlit Secrets")
-
-        # Create a session with the provided credentials
-        session = boto3.Session(
-            aws_access_key_id=access_key_id,
-            aws_secret_access_key=secret_access_key
-        )
-
-        # Assume the role using the role ARN format from aws_accounts.py
-        sts_client = session.client('sts', region_name=REGION)
-        role_arn = f"arn:aws:iam::{account_id}:role/CWMSessionRole"
-        response = sts_client.assume_role(
-            RoleArn=role_arn,
-            RoleSessionName=f"CWM-MSR-Session_{account_id}_{int(time.time())}"
-        )
-
-        # Extract temporary credentials
-        credentials = response['Credentials']
+        sts_response = sts(account_id)
+        if sts_response["status"] != 200:
+            raise Exception(f"Failed to create session for account {account_id}: {sts_response['message']}")
         return boto3.Session(
-            aws_access_key_id=credentials['AccessKeyId'],
-            aws_secret_access_key=credentials['SecretAccessKey'],
-            aws_session_token=credentials['SessionToken']
+            aws_access_key_id=sts_response["data"]["AccessKeyId"],
+            aws_secret_access_key=sts_response["data"]["SecretAccessKey"],
+            aws_session_token=sts_response["data"]["SessionToken"],
         )
     except Exception as e:
-        logger.error(f"Role assumption failed for account {account_id}: {str(e)}")
+        logger.error(f"Role assumption failed: {str(e)}")
         raise
 
 # Initialize session state for AWS credentials and configuration
