@@ -674,10 +674,6 @@ else:
         st.markdown('<div class="metric-container">', unsafe_allow_html=True)
         st.metric("Number of Services", num_services)
         st.markdown('</div>', unsafe_allow_html=True)
-    with col4:
-        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-        st.metric("Total Usage", f"{total_usage:.2f}")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     # Tabs for different sections
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Cost Analysis", "🖥️ EC2 Status", "💰 Budgets", "⚠️ Cost Anomalies", "💡 Recommendations"])
