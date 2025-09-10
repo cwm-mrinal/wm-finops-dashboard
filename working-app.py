@@ -253,8 +253,8 @@ def forecast_costs(trend_df, forecast_days):
     })
     return forecast_df
 
-# Enhanced Function to get recommendations from AWS Bedrock based on selected pillars
-def get_recommendations(cost_df, audit_df, selected_pillars):
+# Function to get recommendations from AWS Bedrock
+def get_recommendations(cost_df, audit_df):
     try:
         # Retrieve credentials from Streamlit Secrets for Bedrock client
         infra_access_key_id = st.secrets["infra-aws"]["access_key_id"]
@@ -302,11 +302,10 @@ def get_recommendations(cost_df, audit_df, selected_pillars):
             "audit_data": audit_summary
         }
 
-        pillars_str = ", ".join(selected_pillars)
-        query = f"Provide recommendations based on the AWS Well-Architected Framework's pillars: {pillars_str}, using the provided AWS cost and audit data."
+        query = "Provide cost optimization recommendations based on the provided AWS cost and audit data."
 
         system_prompt = """
-You are a support assistant specializing in the AWS Well-Architected Framework, covering the 6 pillars: Cost Optimization, Security, Reliability, Sustainability, Performance Efficiency, and Operational Excellence. You help customers optimize their AWS environments across these pillars—without requesting more information.
+You are a support assistant specializing in AWS billing, usage analysis, and cost optimization. You help customers address issues related to unexpected charges, cost spikes, and budget control—without requesting more information.
 
 Your Objectives:
 
@@ -314,7 +313,7 @@ Acknowledge the concern with empathy and professionalism.
 
 Make intelligent assumptions when the issue is vague.
 
-Provide 3–5 actionable suggestions per selected pillar to help the customer improve their AWS environment.
+Provide 7–8 actionable suggestions to help the customer reduce or analyze costs.
 
 Maintain a confident, solution-focused, and supportive tone.
 
@@ -322,33 +321,34 @@ Structured Response Format and Style:
 
 Hello,
 
-Thank you for reaching out. We understand the importance of aligning your AWS environment with best practices, and we're here to help you enhance it across the selected Well-Architected pillars.
+Thank you for reaching out. We understand how concerning unexpected billing charges or cost spikes can be, and we're here to help you take control of the situation quickly and effectively.
 
-[Optional – Summarize the data insights]
+[Optional – Restate or summarize the issue]
+It appears you're noticing [a sudden cost increase / unexpected usage / higher than expected billing on a service or project].
 
-Here are tailored recommendations for each pillar:
+Here are a few actions you can take right away to review and reduce your AWS costs:
 
-**Cost Optimization:**
+Use AWS Cost Explorer
 
-- Suggestion 1
+Review cost trends and group by service, account, or tag to pinpoint changes.
 
-- Suggestion 2
+Use the “Daily Granularity” view to isolate when the spike occurred.
 
-- ...
+Check for Idle or Underutilized Resources
 
-**Security:**
+Look for unused EC2 instances, idle RDS databases, or EBS volumes with minimal I/O.
 
-- Suggestion 1
+Use Trusted Advisor or Compute Optimizer to identify and right-size inefficient resources.
 
-- Suggestion 2
+Review Budgets and Enable Alerts
 
-- ...
+Set up AWS Budgets with alert thresholds to proactively monitor spend.
 
-[Repeat for other selected pillars]
+Enable Cost Anomaly Detection for early warnings about unusual usage.
 
-We recommend implementing these steps to improve your AWS architecture. We're confident this will help you achieve better outcomes.
+We recommend implementing these steps as soon as possible to mitigate further costs. We're confident this will help you regain control over your AWS spend.
 
-Please don’t hesitate to reach out if you need further assistance—we’re here to support you every step of the way.
+Please don’t hesitate to reach out if the situation escalates—we’re here to support you every step of the way.
 
 Best regards,
 Workmates Support
@@ -455,7 +455,7 @@ if logo_base64:
 else:
     st.title("AWS FinOps Dashboard")
 
-st.markdown("Monitor, optimize, and forecast your AWS costs with advanced insights and AI-powered recommendations based on AWS Well-Architected Framework.")
+st.markdown("Monitor, optimize, and forecast your AWS costs with advanced insights and AI-powered recommendations.")
 
 # Enhanced CSS Styling with more animations and responsiveness
 st.markdown("""
@@ -791,15 +791,10 @@ else:
 
     # Recommendations
     with tab5:
-        st.header("Well-Architected Recommendations")
-        selected_pillars = st.multiselect(
-            "Select Pillars for Recommendations",
-            options=["Cost Optimization", "Security", "Reliability", "Sustainability", "Performance Efficiency", "Operational Excellence"],
-            default=["Cost Optimization"]
-        )
-        if st.button("Generate Recommendations") and selected_pillars:
+        st.header("Cost Optimization Recommendations")
+        if st.button("Generate Recommendations"):
             with st.spinner("Generating recommendations..."):
-                recommendations = get_recommendations(cost_df, get_audit_report(tuple(config['profiles']), config['account_id'], tuple(config['regions'])), selected_pillars)
+                recommendations = get_recommendations(cost_df, get_audit_report(tuple(config['profiles']), config['account_id'], tuple(config['regions'])))
                 st.markdown(recommendations)
                 if 'pdf' in config['report_types']:
                     pdf = FPDF()
