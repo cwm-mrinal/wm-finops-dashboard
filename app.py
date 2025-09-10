@@ -440,7 +440,7 @@ def get_base64_image(image_path):
         return None
 
 # Streamlit UI Configuration
-st.set_page_config(page_title="AWS FinOps Dashboard", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="AWS Well-Architected Dashboard", layout="wide", initial_sidebar_state="expanded")
 
 # Display logo and title
 logo_path = "CWM-New-Logo.png"
@@ -449,11 +449,11 @@ if logo_base64:
     st.markdown(f"""
         <div style='display: flex; align-items: center; margin-bottom: 1rem;'>
             <img src='data:image/png;base64,{logo_base64}' width='100' style='margin-right: 1rem;'>
-            <h1 style='margin: 0;'>AWS FinOps Dashboard</h1>
+            <h1 style='margin: 0;'>AWS Well-Architected Dashboard</h1>
         </div>
     """, unsafe_allow_html=True)
 else:
-    st.title("AWS FinOps Dashboard")
+    st.title("AWS Well-Architected Dashboard")
 
 st.markdown("Monitor, optimize, and forecast your AWS costs with advanced insights and AI-powered recommendations based on AWS Well-Architected Framework.")
 
